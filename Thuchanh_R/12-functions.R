@@ -707,14 +707,24 @@ safe_log("abc")  # "Lỗi: ..."
 # 1. Viết function tính diện tích hình chữ nhật
 # Input: chiều dài, chiều rộng
 # Output: diện tích
+dien_tich_hcn = function(chieu_dai, chieu_rong){
+  return (chieu_dai*chieu_rong)
+}
 
 # 2. Viết function tính chu vi hình tròn
 # Input: bán kính
 # Output: chu vi
+chu_vi_ht = function(ban_kinh){
+  chu_vi = 2*pi*ban_kinh
+  return(chu_vi)
+}
 
 # 3. Viết function chuyển đổi nhiệt độ từ Celsius sang Fahrenheit
 # Công thức: F = C * 9/5 + 32
-
+celsius_to_fahrenheit = function(celsius){
+  fahrenheit = celsius * 9/5 + 32
+  return(fahrenheit)
+}
 # ------------------------------------------------------------------------------
 # Bài tập 2: Function với validation
 # ------------------------------------------------------------------------------
@@ -723,6 +733,18 @@ safe_log("abc")  # "Lỗi: ..."
 # Input: một số nguyên
 # Output: "Chẵn" hoặc "Lẻ"
 # Validate: input phải là số nguyên
+kiem_tra_chan_le <- function(n) {
+  # Validate input phải là số và không có phần thập phân
+  if (!is.numeric(n) || n %% 1 != 0) {
+    stop("Lỗi: Input bắt buộc phải là số nguyên.")
+  }
+  
+  if (n %% 2 == 0) {
+    return("Chẵn")
+  } else {
+    return("Lẻ")
+  }
+}
 
 # 2. Viết function tính điểm trung bình
 # Input: vector điểm số
@@ -730,6 +752,17 @@ safe_log("abc")  # "Lỗi: ..."
 # Validate: 
 #   - Điểm phải từ 0 đến 10
 #   - Loại bỏ giá trị NA
+tinh_diem_tb <- function(diem_vector) {
+  # Loại bỏ các giá trị khuyết thiếu (NA) trước khi xử lý
+  diem_sach <- diem_vector[!is.na(diem_vector)]
+  
+  # Validate điểm phải từ 0 đến 10
+  if (any(diem_sach < 0 | diem_sach > 10)) {
+    stop("Lỗi: Có điểm số không nằm trong khoảng 0-10.")
+  }
+  
+  return(mean(diem_sach))
+}
 
 # ------------------------------------------------------------------------------
 # Bài tập 3: Function thống kê
@@ -738,12 +771,33 @@ safe_log("abc")  # "Lỗi: ..."
 # 1. Viết function tính toán tổng quan
 # Input: vector số
 # Output: list(mean, median, sd, min, max, range)
+thong_ke_tong_quan <- function(x) {
+  x <- x[!is.na(x)] # Xử lý NA để tránh lỗi khi tính toán
+  
+  result <- list(
+    mean = mean(x),
+    median = median(x), # Rất hữu ích khi bạn cần thay thế NA bằng trung vị sau này
+    sd = sd(x),
+    min = min(x),
+    max = max(x),
+    range = max(x) - min(x)
+  )
+  return(result)
+}
 
 # 2. Viết function tính hoán vị P(n, r)
 # Công thức: P(n,r) = n! / (n-r)!
+tinh_hoan_vi <- function(n, r) {
+  if (n < r) stop("n phải lớn hơn hoặc bằng r")
+  return(factorial(n) / factorial(n - r))
+}
 
 # 3. Viết function tính tổ hợp C(n, r)
 # Công thức: C(n,r) = n! / (r! * (n-r)!)
+tinh_to_hop <- function(n, r) {
+  if (n < r) stop("n phải lớn hơn hoặc bằng r")
+  return(factorial(n) / (factorial(r) * factorial(n - r)))
+}
 
 # ------------------------------------------------------------------------------
 # Bài tập 4: Function nâng cao
@@ -752,14 +806,58 @@ safe_log("abc")  # "Lỗi: ..."
 # 1. Viết function tìm các số nguyên tố từ 1 đến n
 # Input: n
 # Output: vector các số nguyên tố
+tim_so_nguyen_to <- function(n) {
+  if (n < 2) return(NULL)
+  
+  # Function lồng nhau để kiểm tra 1 số
+  is_prime <- function(x) {
+    if (x == 2) return(TRUE)
+    if (x %% 2 == 0) return(FALSE)
+    for (i in 3:sqrt(x)) {
+      if (x %% i == 0) return(FALSE)
+    }
+    return(TRUE)
+  }
+  
+  primes <- c()
+  for (i in 2:n) {
+    if (is_prime(i)) primes <- c(primes, i)
+  }
+  return(primes)
+}
 
 # 2. Viết function tạo tam giác Pascal với n hàng
 # Gợi ý: Sử dụng tổ hợp C(n, k)
+tam_giac_pascal <- function(n) {
+  for (i in 0:(n-1)) {
+    hang <- c()
+    for (k in 0:i) {
+      hang <- c(hang, tinh_to_hop(i, k)) # Tái sử dụng function ở Bài 3
+    }
+    cat(hang, "\n") # In từng hàng
+  }
+}
 
 # 3. Viết function phân loại sinh viên dựa vào điểm
 # Input: điểm số
 # Output: xếp loại (Xuất sắc, Giỏi, Khá, TB, Yếu)
 # Kèm theo GPA scale 4.0
+phan_loai_sinh_vien <- function(diem_he_10) {
+  gpa <- (diem_he_10 / 10) * 4
+  
+  phan_loai <- ifelse(gpa >= 3.6, "Xuất sắc",
+                      ifelse(gpa >= 3.2, "Giỏi",
+                             ifelse(gpa >= 2.5, "Khá",
+                                    ifelse(gpa >= 2.0, "Trung bình", "Yếu"))))
+  
+  # Chuyển đổi thành ordered factor (biến phân loại có thứ bậc)
+  # Việc này cực kỳ chuẩn bài khi bạn đưa dữ liệu vào các mô hình thống kê
+  phan_loai_factor <- factor(phan_loai, 
+                             levels = c("Yếu", "Trung bình", "Khá", "Giỏi", "Xuất sắc"), 
+                             ordered = TRUE)
+  
+  return(data.frame(Diem_10 = diem_he_10, GPA = round(gpa, 2), Xep_Loai = phan_loai_factor))
+}
 
 # ------------------------------------------------------------------------------
 # Bài tập 5: Ứng dụng thực tế
@@ -768,15 +866,50 @@ safe_log("abc")  # "Lỗi: ..."
 # 1. Viết function tính lương ròng
 # Input: lương cơ bản, phụ cấp, số ngày làm việc, số giờ tăng ca
 # Output: lương ròng sau thuế
+tinh_luong_rong <- function(luong_cb, phu_cap, ngay_lam, gio_tang_ca) {
+  luong_1_ngay <- luong_cb / 22
+  tien_tang_ca <- (luong_1_ngay / 8) * 1.5 * gio_tang_ca # Giả định OT x1.5
+  
+  tong_thu_nhap <- (luong_1_ngay * ngay_lam) + phu_cap + tien_tang_ca
+  
+  # Giả định đơn giản: Thuế TNCN 10% cho phần thu nhập vượt 11 triệu
+  thue <- 0
+  if (tong_thu_nhap > 11000000) {
+    thue <- (tong_thu_nhap - 11000000) * 0.1
+  }
+  
+  luong_rong <- tong_thu_nhap - thue
+  return(round(luong_rong, 0))
+}
 
 # 2. Viết function chuẩn hóa điểm thi
 # Input: vector điểm thô
 # Output: vector điểm chuẩn hóa (0-100)
 # Công thức: (điểm - min) / (max - min) * 100
+chuan_hoa_diem <- function(diem_tho) {
+  min_val <- min(diem_tho, na.rm = TRUE)
+  max_val <- max(diem_tho, na.rm = TRUE)
+  
+  diem_chuan_hoa <- (diem_tho - min_val) / (max_val - min_val) * 100
+  return(round(diem_chuan_hoa, 2))
+}
 
 # 3. Viết function phân tích dữ liệu sinh viên
 # Input: data frame (tên, tuổi, điểm)
 # Output: thống kê mô tả đầy đủ
+phan_tich_data_sv <- function(df) {
+  # Kiểm tra xem có đủ cột không
+  if (!all(c("Ten", "Tuoi", "Diem") %in% colnames(df))) {
+    stop("Data frame phải chứa các cột: Ten, Tuoi, Diem")
+  }
+  
+  cat("=== BÁO CÁO THỐNG KÊ SINH VIÊN ===\n")
+  cat("- Tổng số sinh viên:", nrow(df), "\n")
+  cat("- Độ tuổi trung bình:", round(mean(df$Tuoi, na.rm = TRUE), 1), "\n")
+  
+  cat("- Phân bố điểm số:\n")
+  print(thong_ke_tong_quan(df$Diem)) # Gọi lại function ở Bài 3
+}
 
 # ==============================================================================
 # TÀI LIỆU THAM KHẢO
